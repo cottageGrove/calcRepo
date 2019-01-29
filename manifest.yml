@@ -1,5 +1,5 @@
 applications:
-- name: watson-assistant-simple
+- name: CalculatorAssistant
   command: npm start
   path: .
   memory: 256M
