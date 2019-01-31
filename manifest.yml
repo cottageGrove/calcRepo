@@ -1,3 +1,6 @@
+# Starting with Watson Assistant V2, declared services are no longer needed as they are configured
+# through the cloud interface. Onky the name of the assistant needs to be configured to match the 
+# name of the assistant targeted by the application.
 applications:
 - name: CalculatorAssistant
   command: npm start
