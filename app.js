@@ -83,8 +83,8 @@ app.post('/api/message', function (req, res) {
       return res.status(err.code || 500).json(err);
     }
 
-    //ProfM: return a processed message that will replace the _result_ of the calculation with the 
-    //actual result of the math operations
+    //Before returning the result, call the updateMessage() to provide an opportunity for the 
+    //the response to be processed
     return res.json(updateMessage(payload, data)); 
     });
 });
@@ -102,7 +102,9 @@ app.get('/api/session', function (req, res) {
 });
 
 /**
- * Updates the response text using the intent confidence
+ * The method processes the reponse by replacing the _result_ of the calculation with the 
+ * actual result of the math operation expressed by the intent. For any other intent
+ * the response is returned as is
  * @param  {Object} input The request to the Conversation service
  * @param  {Object} response The response from the Conversation service
  * @return {Object}          The response with the updated message
@@ -113,7 +115,11 @@ function updateMessage(input, response) {
   if (!response.output) {
     response.output = {};
   } else {
-  	// Check if the intent returned from Conversation service is add or multiply, perform the calculation and update the response
+    // Check if the intent returned from Conversation service is add or multiply, 
+    // perform the calculation and update the response. 
+    // Starting with V2, intents are accessible through the output property of the response 
+    // and not directly from the response object
+    // Reference: https://cloud.ibm.com/apidocs/assistant-v2?language=node#send-user-input-to-assistant
   	if (response.output.intents.length > 0 && 
   		  (response.output.intents[0].intent === 'add' || 
   		   response.output. intents[0].intent === 'multiply')) {
@@ -122,7 +128,7 @@ function updateMessage(input, response) {
     return response;
   }
   
-  if (response.intents && response.intents[0]) {
+  if (response.output.intents && response.output.intents[0]) {
     var intent = response.intents[0];
     
     // Depending on the confidence of the response the app can return different messages.
@@ -145,7 +151,11 @@ function updateMessage(input, response) {
 
 /**
 * Get the operands, perform the calculation and update the response text based on the
-* calculation.
+* calculation.     
+* Starting with V2, intents and entities are accessible through the output property of the response 
+* and not directly from the response object. The text property provided as a response is available
+* through the response.output.generic object as responses can now include multiple response types
+* Reference: https://cloud.ibm.com/apidocs/assistant-v2?language=node#send-user-input-to-assistant
 * @param {Object} response The response from the Conversation service
 * @return {Object} The response with the updated message
 */
@@ -177,4 +187,5 @@ function getCalculationResult(response){
 	// Return the updated response text based on the calculation
 	return response;
 }
+
 module.exports = app;
